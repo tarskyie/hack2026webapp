@@ -1,0 +1,31 @@
+﻿@page "/login"
+@inject ConnectivityService connectivityService
+@inject NavigationManager navigationManager
+@inject StorageService storageService
+<h3>Login</h3>
+
+<MudTextField @bind-Value="username" Label="Enter Name" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="password" Label="Enter Password" Variant="Variant.Outlined" />
+<MudButton OnClick="LogIn_Onclick">Log in</MudButton>
+@status
+
+@code {
+    private string username;
+    private string password;
+    private string status = string.Empty;
+
+    private async Task LogIn_Onclick()
+    {
+        string token = await connectivityService.LogIn(username, password);
+        status = token;
+
+        var sub = token.Substring(0,5);
+        if (sub != "nokey")
+        {
+            await storageService.SetItemAsync("refresh", token);
+            navigationManager.NavigateTo("/", forceLoad: true);
+        }
+
+        return;
+    }
+}
