@@ -13,13 +13,14 @@
     }
 
     .feature-card {
-        background-color: white;
+        background-color: #f7f7f7;
         padding: 1.5rem;
         height: 100%;
     }
 
     .feature-image-container {
-        background-color: white;
+        background-color: #f7f7f7;
+        ;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -44,44 +45,47 @@
             </MudItem>
         </MudGrid>
 
-        <MudText Typo="Typo.h5" Class="mt-4" Style="font-weight: 700;">РТ Смарт — это:</MudText>
+        <MudPaper Class="p-2 rounded" >
+            <MudStack Spacing="4">
+                <MudText Typo="Typo.h5" Class="mt-4" Style="font-weight: 700;">РТ Смарт — это:</MudText>
         
-        <MudGrid Spacing="0" Class="mud-elevation-0">
-            <MudItem xs="12" md="8" Class="order-1">
-                <div class="feature-card">
-                    <MudText Typo="Typo.h5" GutterBottom="true">«Режим сна»</MudText>
-                    <MudText Typo="Typo.body1">Умный дом анализирует свет и звук. Когда вы ложитесь спать, система видит отсутствие движения, переводит дом в режим охраны, выключает свет и переводит ваш смартфон в режим «Не беспокоить».</MudText>
-                </div>
-            </MudItem>
-            <MudItem xs="12" md="4" Class="order-2 feature-image-container">
-                <img src="https://static.vecteezy.com/system/resources/previews/045/828/548/non_2x/modern-bed-isolated-on-background-png.png" alt="bed" style="max-width: 200px; width: 100%" />
-            </MudItem>
-        </MudGrid>
+                <MudGrid Spacing="0" Class="mud-elevation-0" Style="background-color: #f7f7f7;">
+                    <MudItem xs="12" md="8" Class="order-1" Style="background-color: #f7f7f7;">
+                        <div class="feature-card">
+                            <MudText Typo="Typo.h5" GutterBottom="true">«Режим сна»</MudText>
+                            <MudText Typo="Typo.body1">Умный дом анализирует свет и звук. Когда вы ложитесь спать, система видит отсутствие движения, переводит дом в режим охраны, выключает свет и переводит ваш смартфон в режим «Не беспокоить».</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="order-2 feature-image-container" Style="background-color: #f7f7f7;">
+                        <img src="https://static.vecteezy.com/system/resources/previews/045/828/548/non_2x/modern-bed-isolated-on-background-png.png" alt="bed" style="max-width: 200px; width: 100%" />
+                    </MudItem>
+                </MudGrid>
         
-        <MudGrid Spacing="0">
-            <MudItem xs="12" md="4" Class="order-2 order-md-1 feature-image-container">
-                <img src="https://mtk-com.kz/sites/default/files/schet.png" alt="meters" style="max-width: 200px; width: 100%" />
-            </MudItem>
-            <MudItem xs="12" md="8" Class="order-1 order-md-2">
-                <div class="feature-card">
-                    <MudText Typo="Typo.h5" GutterBottom="true">«Умная платежка»</MudText>
-                    <MudText Typo="Typo.body1">Система сама снимает показания счетчиков и сверяет их с тарифами в личном кабинете. Если потребление воды или тока аномально выросло, приложение пришлет пуш.</MudText>
-                </div>
-            </MudItem>
-        </MudGrid>
+                <MudGrid Spacing="0" Style="background-color: #f7f7f7;">
+                    <MudItem xs="12" md="4" Class="order-2 order-md-1 feature-image-container" Style="background-color: #f7f7f7;">
+                        <img src="https://mtk-com.kz/sites/default/files/schet.png" alt="meters" style="max-width: 200px; width: 100%" />
+                    </MudItem>
+                    <MudItem xs="12" md="8" Class="order-1 order-md-2" Style="background-color: #f7f7f7;">
+                        <div class="feature-card">
+                            <MudText Typo="Typo.h5" GutterBottom="true">«Умная платежка»</MudText>
+                            <MudText Typo="Typo.body1">Система сама снимает показания счетчиков и сверяет их с тарифами в личном кабинете. Если потребление воды или тока аномально выросло, приложение пришлет пуш.</MudText>
+                        </div>
+                    </MudItem>
+                </MudGrid>
 
-        <MudGrid Spacing="0">
-            <MudItem xs="12" md="8" Class="order-1">
-                <div class="feature-card">
-                    <MudText Typo="Typo.h5" GutterBottom="true">«Не беспокойтесь за безопасность»</MudText>
-                    <MudText Typo="Typo.body1">Умный дом в случайном порядке включает и выключает свет, имитирует звуки телевизора или лай собаки, чтобы создать иллюзию присутствия хозяев.</MudText>
-                </div>
-            </MudItem>
-            <MudItem xs="12" md="4" Class="order-2 feature-image-container">
-                <img src="https://static.vecteezy.com/system/resources/thumbnails/014/585/778/small/gold-locked-padlock-png.png" alt="lock" style="max-width: 150px; width: 100%" />
-            </MudItem>
-        </MudGrid>
-
+                <MudGrid Spacing="0" Style="background-color: #f7f7f7;">
+                    <MudItem xs="12" md="8" Class="order-1" Style="background-color: #f7f7f7;">
+                        <div class="feature-card">
+                            <MudText Typo="Typo.h5" GutterBottom="true">«Не беспокойтесь за безопасность»</MudText>
+                            <MudText Typo="Typo.body1">Умный дом в случайном порядке включает и выключает свет, имитирует звуки телевизора или лай собаки, чтобы создать иллюзию присутствия хозяев.</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="order-2 feature-image-container" Style="background-color: #f7f7f7;">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/014/585/778/small/gold-locked-padlock-png.png" alt="lock" style="max-width: 150px; width: 100%" />
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
     </MudStack>
 </main>
 

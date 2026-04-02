@@ -34,7 +34,7 @@ namespace zhgut2app.Services
             DrawerBackground = "#ffffff",
             GrayLight = "#e8e8e8",
             GrayLighter = "#f9f9f9",
-            Background = "#f3f3f3",
+            Background = "#fcfcfc",
             Primary = "#ff5900",
             TextPrimary = "#000000",
         };
