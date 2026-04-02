@@ -24,23 +24,27 @@
                             <MudListItem>
                                 <div class="d-flex align-center justify-space-between">
                                     <MudText Typo="Typo.body1">@app.Name</MudText>
-                                    <!--
-                                        <MudChip T="string" Size="Size.Small"
-                                                Color="@(app.Status == "active" ? Color.Success : Color.Default)">
-                                        @app.Status
-                                    </MudChip>
-                                    -->
-                                    
-                                    <MudSwitch T="bool" 
-                                       Value="@(app.Status == "active")" 
-                                       ValueChanged="@(() => ToggleStatus(app))"
-                                       Color="Color.Primary" />
-
+                                    <MudSwitch T="bool"
+                                               Value="@(app.Status == "active")"
+                                               ValueChanged="@(() => ToggleStatus(app))"
+                                               Color="Color.Primary" />
                                 </div>
+
+                                @if (app.CategoryId == 2 && app.Temperature.HasValue)
+                                {
+                                    <div class="d-flex align-center gap-2 mt-2">
+                                        <MudText Typo="Typo.body2">Температура: @app.Temperature°C</MudText>
+                                        <MudSlider T="double"
+                                                   Value="@app.Temperature.Value"
+                                                   ValueChanged="@(val => SetTemperature(app, val))"
+                                                   Min="16" Max="30" Step="1"
+                                                   Color="Color.Primary" />
+                                    </div>
+                                }
                             </MudListItem>
                             <MudDivider />
                         }
-                    
+
                         @if (!_appliances.Any(a => a.RoomId == room.Id))
                         {
                             <MudText Typo="Typo.caption" Class="pa-4">Нет устройств, закреплённых к этой комнате.</MudText>
@@ -48,17 +52,22 @@
                     </MudList>
                 </MudExpansionPanel>
             }
+            @if (!_rooms.Any())
+            {
+                <MudText>Комнат нет.</MudText>
+            }
         </MudExpansionPanels>
     </MudContainer>
 }
 else
 {
-    <p>Loading...</p>   
+    <p>Loading...</p>
 }
 
 @code {
+    private string status = "";
+
     private bool loggedInLocally = false;
-    private string status = string.Empty;
     private bool isHomeClientConnected = false;
     private string roomsRaw = string.Empty;
     private string appliancesRaw = string.Empty;
@@ -69,79 +78,100 @@ else
     {
         await base.OnInitializedAsync();
         await AttemptLogIn();
-
     }
 
     private async Task AttemptLogIn()
     {
-
         string? refresh = await storageService.GetItemAsync<string>("refresh");
-        if (refresh == null || refresh == string.Empty) { return; }
+        if (string.IsNullOrEmpty(refresh)) return;
         string access = await connectivityService.GetAccessToken(refresh);
-        if (access == string.Empty) { return; }
+        if (string.IsNullOrEmpty(access)) return;
         loggedInLocally = true;
         connectivityService.isLoggedIn = true;
-        await ConnectivityLoop(CancellationToken.None);
+        await Connect();
     }
 
-    private async Task ConnectivityLoop(CancellationToken token)
+    private async Task Connect()
     {
-        string access = await newToken();
-        while (!token.IsCancellationRequested)
+        string access = await NewToken();
+
+        string raw = await connectivityService.GetHomeClientStatus(access);
+        isHomeClientConnected = raw.Replace("\"", "") != "offline";
+
+        httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", access);
+
+        var response = await httpClient.GetAsync($"{ConnectivityService.baseUrl}/smarthome/rooms/");
+        roomsRaw = await response.Content.ReadAsStringAsync();
+
+        response = await httpClient.GetAsync($"{ConnectivityService.baseUrl}/smarthome/appliances/");
+        appliancesRaw = await response.Content.ReadAsStringAsync();
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        _rooms = JsonSerializer.Deserialize<List<Room>>(roomsRaw, options) ?? new();
+        _appliances = JsonSerializer.Deserialize<List<Appliance>>(appliancesRaw, options) ?? new();
+
+        var acResponse = await httpClient.GetAsync($"{ConnectivityService.baseUrl}/smarthome/air-conditioners/");
+        var acRaw = await acResponse.Content.ReadAsStringAsync();
+        var acList = JsonSerializer.Deserialize<List<AirConditioner>>(acRaw, options) ?? new();
+        status = acRaw;
+
+        foreach (var ac in acList)
         {
-            string raw = await connectivityService.GetHomeClientStatus(access);
-            raw = raw.Replace("\"", "");
+            var match = _appliances.FirstOrDefault(a => a.Id == ac.Id);
 
-            if (raw == "offline")
+            if (match != null)
             {
-                isHomeClientConnected = false;
+                status = match.Id.ToString();
+                match.Temperature = ac.Temperature;
             }
-            else
-            {
-                isHomeClientConnected = true;
-            }
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", access);
-            var response = await httpClient.GetAsync($"{ConnectivityService.baseUrl}/smarthome/rooms/");
-            roomsRaw = await response.Content.ReadAsStringAsync();
-            response = await httpClient.GetAsync($"{ConnectivityService.baseUrl}/smarthome/appliances/");
-            appliancesRaw = await response.Content.ReadAsStringAsync();
-
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            _rooms = JsonSerializer.Deserialize<List<Room>>(roomsRaw, options) ?? new();
-            _appliances = JsonSerializer.Deserialize<List<Appliance>>(appliancesRaw, options) ?? new();
-
-            await Task.Delay(1000, token);
-            StateHasChanged();
         }
+
+        StateHasChanged();
     }
 
-    private async Task<string> newToken()
+    private async Task<string> NewToken()
     {
         string? refresh = await storageService.GetItemAsync<string>("refresh");
-        if (refresh == null || refresh == string.Empty) { return string.Empty; }
-        string access = await connectivityService.GetAccessToken(refresh);
-        if (access == string.Empty) { return string.Empty; }
-        return access;
+        if (string.IsNullOrEmpty(refresh)) return string.Empty;
+        return await connectivityService.GetAccessToken(refresh);
     }
 
     private async void ToggleStatus(Appliance app)
     {
         app.Status = app.Status == "active" ? "inactive" : "active";
-
         var payload = new { status = app.Status };
-        var response = await httpClient.PostAsJsonAsync($"{ConnectivityService.baseUrl}/smarthome/appliances/{app.Id}/set_status/", payload);
+        await httpClient.PostAsJsonAsync(
+            $"{ConnectivityService.baseUrl}/smarthome/appliances/{app.Id}/set_status/", payload);
+    }
+
+    private async void SetTemperature(Appliance app, double newTemp)
+    {
+        app.Temperature = newTemp;
+        var payload = new { temperature = newTemp };
+
+        await httpClient.PostAsJsonAsync(
+            $"{ConnectivityService.baseUrl}/smarthome/air-conditioners/{app.Id}/set_temperature/",
+            payload
+        );
     }
 
     public record Room(int Id, string Name);
-    
+
     public class Appliance
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public string Status { get; set; } = "";
-        
+
         [JsonPropertyName("room")]
         public int RoomId { get; set; }
+
+        [JsonPropertyName("category")]
+        public int CategoryId { get; set; }
+
+        public double? Temperature { get; set; } // merged from AC endpoint
     }
 
+    public record AirConditioner(int Id, double Temperature);
 }
