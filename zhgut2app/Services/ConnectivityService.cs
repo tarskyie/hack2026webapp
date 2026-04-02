@@ -7,7 +7,8 @@ namespace zhgut2app.Services
     public class ConnectivityService
     {
         private static readonly HttpClient client = new HttpClient();
-        private static string baseUrl = "http://127.0.0.1:8000";
+        public const string baseUrl = "https://w29dq7t4-8000.euw.devtunnels.ms/";
+        //public const static string baseUrl = "http://127.0.0.1:8000";
 
         public bool isLoggedIn { get; set; } = false;
 
@@ -107,6 +108,23 @@ namespace zhgut2app.Services
             catch
             {
                 return string.Empty;
+            }
+        }
+
+        public async Task<string> GetHomeClientStatus(string accessToken) {
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+            try
+            {
+                var authRes = await client.GetAsync($"{baseUrl}/smarthome/home_is_online/");
+                if (!authRes.IsSuccessStatusCode) return "offline";
+
+                return await authRes.Content.ReadAsStringAsync();
+
+            }
+            catch
+            {
+                return "offline";
             }
         }
     }
