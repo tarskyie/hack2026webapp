@@ -8,11 +8,12 @@
 
 @if (loggedInLocally)
 {
+    <MudText Typo="Typo.h4" GutterBottom="true">Панель управления</MudText>
+    <MudText Typo="Typo.body1">
+        @(isHomeClientConnected ? "Домашний клиент в сети." : "Домашний клиент не в сети.")
+    </MudText>
     <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
-        <MudText Typo="Typo.h4" GutterBottom="true">Панель управления</MudText>
-        <MudText Typo="Typo.body1">
-            @(isHomeClientConnected ? "Домашний клиент в сети." : "Домашний клиент не в сети.")
-        </MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">Ваши устройства</MudText>
         <MudExpansionPanels MultiExpansion="true" Elevation="4">
             @foreach (var room in _rooms)
             {
@@ -23,14 +24,18 @@
                             <MudListItem>
                                 <div class="d-flex align-center justify-space-between">
                                     <MudText Typo="Typo.body1">@app.Name</MudText>
-                                    <MudChip T="string" Size="Size.Small"
+                                    <!--
+                                        <MudChip T="string" Size="Size.Small"
                                                 Color="@(app.Status == "active" ? Color.Success : Color.Default)">
                                         @app.Status
                                     </MudChip>
-                                    <MudButton Variant="Variant.Filled"
-                                               OnClick="@(() => ToggleStatus(app))">
-                                        @(app.Status == "active" ? "Выключить" : "Включить")
-                                    </MudButton>
+                                    -->
+                                    
+                                    <MudSwitch T="bool" 
+                                       Value="@(app.Status == "active")" 
+                                       ValueChanged="@(() => ToggleStatus(app))"
+                                       Color="Color.Primary" />
+
                                 </div>
                             </MudListItem>
                             <MudDivider />
@@ -38,7 +43,7 @@
                     
                         @if (!_appliances.Any(a => a.RoomId == room.Id))
                         {
-                            <MudText Typo="Typo.caption" Class="pa-4">No appliances assigned.</MudText>
+                            <MudText Typo="Typo.caption" Class="pa-4">Нет устройств, закреплённых к этой комнате.</MudText>
                         }
                     </MudList>
                 </MudExpansionPanel>

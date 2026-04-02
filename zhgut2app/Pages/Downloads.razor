@@ -1,7 +1,37 @@
 ﻿@page "/downloads"
 
-<h3>Downloads</h3>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16">
+    <MudGrid Justify="Justify.Center">
+        <!-- Header Section -->
+        <MudItem xs="12" Class="text-center mb-8">
+            <div class="pa-8 d-flex justify-content-center">
+                <img src="screenshot.png" class="w-50" />
+            </div>
+            <MudText Typography="Typography.h3" GutterBottom="true" Class="fw-bold">Домашний клиент RT Smart</MudText>
+        </MudItem>
 
-@code {
+        <!-- Main Download Card -->
+        <MudItem xs="12" sm="8">
+            <MudPaper Elevation="4" Class="pa-8 mud-text-center">
+                <MudText Typography="Typography.h5" Class="mb-4">Установить последнюю версию</MudText>
+                <MudChip T="string" Color="Color.Info" Variant="Variant.Text" Class="mb-6">Версия 0.0.0</MudChip>
+                
+                <div class="d-flex flex-column gap-4">
+                    <MudButton Variant="Variant.Filled" 
+                               StartIcon="@Icons.Custom.Brands.MicrosoftWindows" 
+                               Color="Color.Primary" 
+                               Size="Size.Large" 
+                               FullWidth="true"
+                               Href="https://github.com/tarskyie/hack2026homeclient/releases/download/v0.0.0/homeclient_setup.exe"
+                               Style="height: 60px;">
+                        Установщик для Windows
+                    </MudButton>
+                </div>
 
-}
+                <MudText Typography="Typography.caption" Class="mt-4 d-block">
+                    Требуется .NET 9.0 или новее.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

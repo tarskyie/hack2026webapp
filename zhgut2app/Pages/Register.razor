@@ -1,34 +1,102 @@
 ﻿@page "/register"
-@inject ConnectivityService connectivityService
+@inject ConnectivityService ConnectivityService
+@inject ISnackbar Snackbar
 
-<h3>Register</h3>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-16">
+    <MudGrid Justify="Justify.Center" Spacing="6" Class="align-center">
+        
+        <MudHidden Breakpoint="Breakpoint.MdAndDown">
+            <MudItem md="6" Class="d-flex flex-column align-start">
+                <img src="rt.png" alt="Rostelecom" style="height: 3rem;" class="mb-4" />
+                <MudText Typo="Typo.h3" Class="font-weight-bold">Ваш личный кабинет</MudText>
+                <MudText Typo="Typo.h6">Управляйте своими устройствами из любой точки мира</MudText>
+            </MudItem>
+        </MudHidden>
 
-<MudTextField @bind-Value="email" Label="Enter E-Mail" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="username" Label="Enter Name" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="password" Label="Enter Password" Variant="Variant.Outlined" />
-<MudButton OnClick="Register_Onclick">Register</MudButton>
-@status
+        <MudItem xs="12" md="5">
+            <MudPaper Elevation="4" Class="pa-8 mt-2" Style="border-radius: 16px;">
+                <MudStack Spacing="4">
+                    <div class="text-center">
+                        <MudText Typo="Typo.h4" GutterBottom="true">Регистрация</MudText>
+                        <MudText Typo="Typo.body2">Введите свои данные для создания аккаунта</MudText>
+                    </div>
+
+                    <MudTextField @bind-Value="_email" Label="E-mail" Variant="Variant.Outlined"
+                                  InputType="InputType.Email" FullWidth />
+                    
+                    <MudTextField @bind-Value="_username" Label="Отображаемое имя" Variant="Variant.Outlined"
+                                  FullWidth />
+
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="_password" Label="Пароль" Variant="Variant.Outlined"
+                                          InputType="InputType.Password" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="_passwordConfirm" Label="Подтверждение" Variant="Variant.Outlined"
+                                          InputType="InputType.Password" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudButton Variant="Variant.Filled"
+                               Size="Size.Large"
+                               FullWidth="true"
+                               OnClick="HandleRegister"
+                               Disabled="_isProcessing"
+                               Style="background-color: #F54328; color: #fff; border-radius: 25px; height: 50px;">
+                        @if (_isProcessing)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        }
+                        else
+                        {
+
+                            <MudText Style="color: #fff;">Зарегистрироваться</MudText>
+                        }
+                    </MudButton>
+
+                    <div class="text-center mt-2">
+                        <MudLink href="/register" Underline="Underline.None" Color="Color.Primary">Есть аккаунт? Войти</MudLink>
+                    </div>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
-    private string username;
-    private string password;
-    private string email;
+    private string _email, _username, _password, _passwordConfirm;
+    private bool _isProcessing;
 
-    private string status = string.Empty;
-
-    private async Task Register_Onclick()
+    private async Task HandleRegister()
     {
-        string? response = await connectivityService.Register(email, username, password);
-        if (response == null)
+        if (_password != _passwordConfirm)
         {
-            status = "Null";
+            Snackbar.Add("Пароли не совпадают", Severity.Error);
             return;
         }
-        status = response;
-        if (response.Substring(0, 7) == "success")
+
+        _isProcessing = true;
+        try
         {
-            status = "Аккаунт создан.";
+            var response = await ConnectivityService.Register(_email, _username, _password);
+            
+            if (response?.StartsWith("success") == true)
+            {
+                Snackbar.Add("Аккаунт успешно создан", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add(response ?? "Ошибка сервера", Severity.Error);
+            }
         }
-        return;
+        catch (Exception ex)
+        {
+            Snackbar.Add("Произошла непредвиденная ошибка", Severity.Error);
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
     }
 }

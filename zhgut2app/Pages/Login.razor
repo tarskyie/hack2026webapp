@@ -2,30 +2,93 @@
 @inject ConnectivityService connectivityService
 @inject NavigationManager navigationManager
 @inject StorageService storageService
-<h3>Login</h3>
+@inject ISnackbar Snackbar
 
-<MudTextField @bind-Value="username" Label="Enter Name" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="password" Label="Enter Password" Variant="Variant.Outlined" />
-<MudButton OnClick="LogIn_Onclick">Log in</MudButton>
-@status
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-16">
+    <MudGrid Justify="Justify.Center" Spacing="6" Class="align-center">
+        
+        <MudHidden Breakpoint="Breakpoint.MdAndDown">
+            <MudItem md="6" Class="d-flex flex-column align-start">
+                <img src="rt.png" alt="Rostelecom" style="height: 3rem;" class="mb-4" />
+                <MudText Typo="Typo.h3" Class="font-weight-bold">Ваш личный кабинет</MudText>
+                <MudText Typo="Typo.h6">Управляйте своими устройствами из любой точки мира</MudText>
+            </MudItem>
+        </MudHidden>
+
+        <MudItem xs="12" md="5">
+            <MudPaper Elevation="4" Class="pa-8 mt-2" Style="border-radius: 16px;">
+                <MudStack Spacing="4">
+                    <div class="text-center">
+                        <MudText Typo="Typo.h4" GutterBottom="true">Вход</MudText>
+                        <MudText Typo="Typo.body2">Введите свои данные для доступа к аккаунту</MudText>
+                    </div>
+
+                    <MudTextField @bind-Value="username" Label="Имя пользователя" Variant="Variant.Outlined"
+                                  FullWidth />
+                    
+                    <MudTextField @bind-Value="password" Label="Пароль" Variant="Variant.Outlined"
+                                  InputType="InputType.Password" FullWidth />
+
+                    <MudButton Variant="Variant.Filled"
+                               Size="Size.Large"
+                               FullWidth="true"
+                               OnClick="LogIn_Onclick"
+                               Disabled="_isProcessing"
+                               Style="background-color: #F54328; color: white; border-radius: 25px; height: 50px;">
+                        @if (_isProcessing)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        }
+                        else
+                        {
+                            <MudText Style="color:#fff;">Войти</MudText>
+                        }
+                    </MudButton>
+
+                    <div class="text-center mt-2">
+                        <MudLink href="/register" Underline="Underline.None" Color="Color.Primary">Нет аккаунта? Зарегистрироваться</MudLink>
+                    </div>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
     private string username;
     private string password;
-    private string status = string.Empty;
+    private bool _isProcessing;
 
     private async Task LogIn_Onclick()
     {
-        string token = await connectivityService.LogIn(username, password);
-        status = token;
-
-        var sub = token.Substring(0,5);
-        if (sub != "nokey")
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            await storageService.SetItemAsync("refresh", token);
-            navigationManager.NavigateTo("/", forceLoad: true);
+            Snackbar.Add("Пожалуйста, заполните все поля", Severity.Warning);
+            return;
         }
 
-        return;
+        _isProcessing = true;
+        try
+        {
+            string token = await connectivityService.LogIn(username, password);
+
+            if (!string.IsNullOrEmpty(token) && !token.StartsWith("nokey"))
+            {
+                await storageService.SetItemAsync("refresh", token);
+                navigationManager.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                Snackbar.Add("Ошибка входа: проверьте данные", Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Произошла ошибка при подключении", Severity.Error);
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
     }
 }

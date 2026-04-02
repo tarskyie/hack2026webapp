@@ -36,7 +36,7 @@ namespace zhgut2app.Services
             GrayLighter = "#f9f9f9",
             Background = "#f3f3f3",
             Primary = "#ff5900",
-            TextPrimary = "#000000"
+            TextPrimary = "#000000",
         };
 
         private readonly PaletteDark _darkPalette = new()
